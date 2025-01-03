@@ -13,14 +13,17 @@ impl<O, U> UnaryUnit<O, U> {
   }
 }
 
-impl<O, T, U, I> Unit<I> for UnaryUnit<O, U>
+impl<O, T, U> Unit for UnaryUnit<O, U>
 where
   O: UnaryOp<T>,
-  U: Unit<I, Output = T>,
+  U: Unit<Output = T>,
 {
   type Output = O::Output;
 
-  fn eval(&self, symbol_map: &HashMap<Symbol, I>) -> CalculatorResult<Self::Output> {
+  fn eval(
+    &self,
+    symbol_map: &HashMap<Symbol<Self::Output>, Self::Output>,
+  ) -> CalculatorResult<Self::Output> {
     Ok(self.op.eval(self.unit.eval(symbol_map)?))
   }
 }
@@ -63,7 +66,7 @@ mod tests {
 
   use crate::{define_sym, unit::Unit};
 
-  define_sym!(x);
+  define_sym!(x, i32);
 
   #[gtest]
   fn test_trivial() {
