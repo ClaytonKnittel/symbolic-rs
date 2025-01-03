@@ -10,12 +10,13 @@ macro_rules! define_sym {
     $crate::paste::paste! {
       thread_local! {
         #[allow(non_upper_case_globals)]
-        static [<$x _INTERIOR>]: std::cell::Cell<Option<$t>> = std::cell::Cell::new(None);
+        static [<$x _INTERIOR>]: std::cell::Cell<Option<usize>> = std::cell::Cell::new(None);
       }
 
       #[allow(non_upper_case_globals)]
-      static $x: $crate::unit::Unit<$crate::symbol::Symbol<$t>> =
-      const { $crate::unit::Unit($crate::symbol::Symbol::new(&[<$x _INTERIOR>], stringify!($x))) };
+      static $x: $crate::symbol::Symbol<$t> = const {
+        $crate::symbol::Symbol::new(&[<$x _INTERIOR>], stringify!($x))
+      };
     }
   };
 }
@@ -25,7 +26,7 @@ macro_rules! define_sym {
 pub struct Symbol<'a, I: 'static> {
   #[derivative(PartialEq = "ignore")]
   #[derivative(Hash = "ignore")]
-  val: &'a LocalKey<Cell<Option<I>>>,
+  val: &'static LocalKey<Cell<Option<usize>>>,
 
   name: &'a str,
 
@@ -35,7 +36,7 @@ pub struct Symbol<'a, I: 'static> {
 }
 
 impl<'a, I> Symbol<'a, I> {
-  pub const fn new(val: &'a LocalKey<Cell<Option<I>>>, name: &'a str) -> Self {
+  pub const fn new(val: &'static LocalKey<Cell<Option<usize>>>, name: &'a str) -> Self {
     Self {
       val,
       name,
@@ -43,18 +44,22 @@ impl<'a, I> Symbol<'a, I> {
     }
   }
 
+  pub fn table_offset(&self) -> Option<usize> {
+    self.val.get()
+  }
+
   pub const fn name(&self) -> &str {
     &self.name
   }
 }
 
-impl<'a, I> Expression for Symbol<'a, I>
+impl<'a, I, const N: usize> Expression<N> for Symbol<'a, I>
 where
   I: Clone + Neg + 'static,
 {
   type Output = I;
 
-  fn eval(&self, context: &EvalContext) -> CalculatorResult<I> {
+  fn eval(&self, context: &EvalContext<N>) -> CalculatorResult<I> {
     context.sym_val(self)
   }
 }

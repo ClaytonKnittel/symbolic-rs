@@ -6,36 +6,45 @@ use crate::{
 };
 
 #[macro_export]
+macro_rules! construct_data {
+  ($size:expr) => {
+    let data = [0u8; $size]
+  };
+  ($size:expr, $sym:expr $(, $syms:expr )*) => {
+    $crate::expand_eval_bindings!($size + std::mem::size_of::<$sym::Output>() $(, $syms )*)
+  };
+}
+
+#[macro_export]
 macro_rules! expand_eval_bindings {
   ($ctx:expr) => {};
   ($ctx:expr, ($sym:expr, $binding:expr) $(, ($syms:expr, $bindings:expr) )*) => {
-    $ctx.bind(&$sym.0, $binding)?;
+    $ctx.bind(&$sym, $binding)?;
     $crate::expand_eval_bindings!($ctx $(, ($syms, $bindings) )*)
   };
 }
 
 #[macro_export]
 macro_rules! eval {
-  ($eqn:expr, $( ($syms:expr, $bindings:expr) ),*) => {|| -> $crate::error::CalculatorResult<_> {
-    let mut ctx = $crate::eval_context::EvalContext::new();
-    $crate::expand_eval_bindings!(ctx, $( ($syms, $bindings) ),*);
+  ($eqn:expr $(, ($syms:expr, $bindings:expr) )*) => {|| -> $crate::error::CalculatorResult<_> {
+    $crate::construct_data!(0 $(, $syms )*);
+    let mut ctx = $crate::eval_context::EvalContext::new(data);
+    $crate::expand_eval_bindings!(ctx $(, ($syms, $bindings) )*);
     use $crate::expression::Expression;
     $eqn.eval(&ctx)
   }()};
 }
 
-pub struct EvalContext<'a> {
-  map: HashMap<&'a str, Box<dyn Any>>,
+pub struct EvalContext<const N: usize> {
+  data: [u8; N],
 }
 
-impl<'a> EvalContext<'a> {
-  pub fn new() -> Self {
-    Self {
-      map: HashMap::new(),
-    }
+impl<const N: usize> EvalContext<N> {
+  pub fn new(data: [u8; N]) -> Self {
+    Self { data }
   }
 
-  pub fn bind<T>(&mut self, symbol: &'a Symbol<T>, binding: T) -> CalculatorResult
+  pub fn bind<T>(&mut self, symbol: &Symbol<T>, binding: T) -> CalculatorResult
   where
     T: 'static,
   {
@@ -56,11 +65,10 @@ impl<'a> EvalContext<'a> {
   where
     T: Clone + 'static,
   {
-    self
-      .map
-      .get(symbol.name())
-      .and_then(|t| t.downcast_ref::<T>())
-      .ok_or_else(|| CalculatorError::SymbolNotFound(symbol.name().to_owned()).into())
-      .cloned()
+    let el = &self.data[symbol
+      .table_offset()
+      .ok_or_else(|| CalculatorError::SymbolNotFound(symbol.name().to_owned()))?..];
+    let ptr: *const T = el.as_ptr().cast();
+    Ok(unsafe { (*ptr).clone() })
   }
 }
