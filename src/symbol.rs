@@ -1,16 +1,17 @@
-use std::{collections::HashMap, marker::PhantomData, ops::Neg};
+use std::{marker::PhantomData, ops::Neg};
 
 use derivative::Derivative;
 
 use crate::{
-  error::{CalculatorError, CalculatorResult},
+  error::CalculatorResult,
+  eval_context::EvalContext,
   unary::{Negate, UnaryUnit},
   unit::Unit,
 };
 
 #[macro_export]
 macro_rules! define_sym {
-  ($x:ident, $t:tt) => {
+  ($x:ident, $t:ty) => {
     #[allow(non_upper_case_globals)]
     const $x: $crate::symbol::Symbol<$t> = $crate::symbol::Symbol::new(stringify!($x));
   };
@@ -32,19 +33,20 @@ impl<I> Symbol<I> {
       _phantom: PhantomData,
     }
   }
+
+  pub const fn name(&self) -> &'static str {
+    &self.name
+  }
 }
 
 impl<I> Unit for Symbol<I>
 where
-  I: Clone + Neg,
+  I: Clone + Neg + 'static,
 {
   type Output = I;
 
-  fn eval(&self, symbol_map: &HashMap<Symbol<I>, I>) -> CalculatorResult<I> {
-    symbol_map
-      .get(self)
-      .ok_or_else(|| CalculatorError::SymbolNotFound(self.name.to_owned()).into())
-      .cloned()
+  fn eval(&self, context: &EvalContext) -> CalculatorResult<I> {
+    context.sym_val(self)
   }
 }
 

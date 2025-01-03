@@ -1,12 +1,9 @@
-use std::{collections::HashMap, ops::Neg};
+use std::ops::Neg;
 
-use crate::{error::CalculatorResult, symbol::Symbol};
+use crate::{error::CalculatorResult, eval_context::EvalContext};
 
 pub trait Unit: Neg {
   type Output;
 
-  fn eval(
-    &self,
-    symbol_map: &HashMap<Symbol<<Self as Unit>::Output>, <Self as Unit>::Output>,
-  ) -> CalculatorResult<<Self as Unit>::Output>;
+  fn eval(&self, context: &EvalContext) -> CalculatorResult<<Self as Unit>::Output>;
 }

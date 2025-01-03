@@ -1,8 +1,8 @@
-use std::{collections::HashMap, ops::Neg};
+use std::ops::Neg;
 
 use crate::{
   error::CalculatorResult,
-  symbol::Symbol,
+  eval_context::EvalContext,
   unary::{Negate, UnaryUnit},
   unit::Unit,
 };
@@ -21,14 +21,11 @@ where
 {
   type Output = O::Output;
 
-  fn eval(
-    &self,
-    symbol_map: &HashMap<Symbol<Self::Output>, Self::Output>,
-  ) -> CalculatorResult<Self::Output> {
+  fn eval(&self, context: &EvalContext) -> CalculatorResult<O::Output> {
     Ok(
       self
         .op
-        .eval(self.lhs.eval(symbol_map)?, self.rhs.eval(symbol_map)?),
+        .eval(self.lhs.eval(context)?, self.rhs.eval(context)?),
     )
   }
 }
@@ -41,7 +38,7 @@ impl<O, L, R> Neg for BinaryUnit<O, L, R> {
   }
 }
 
-trait BinaryOp<T, U> {
+pub trait BinaryOp<T, U> {
   type Output;
 
   fn eval(&self, x: T, y: U) -> Self::Output;
