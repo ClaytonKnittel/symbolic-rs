@@ -19,7 +19,7 @@ macro_rules! eval {
   ($eqn:expr, $( ($syms:expr, $bindings:expr) ),*) => {|| -> $crate::error::CalculatorResult<_> {
     let mut ctx = $crate::eval_context::EvalContext::new();
     $crate::expand_eval_bindings!(ctx, $( ($syms, $bindings) ),*);
-    use $crate::unit::Expression;
+    use $crate::expression::Expression;
     $eqn.eval(&ctx)
   }()};
 }

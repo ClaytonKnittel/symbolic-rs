@@ -2,7 +2,7 @@ use std::{marker::PhantomData, ops::Neg};
 
 use derivative::Derivative;
 
-use crate::{error::CalculatorResult, eval_context::EvalContext, unit::Expression};
+use crate::{error::CalculatorResult, eval_context::EvalContext, expression::Expression};
 
 #[macro_export]
 macro_rules! define_sym {

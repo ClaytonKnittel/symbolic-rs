@@ -1,6 +1,6 @@
 use std::{marker::PhantomData, ops::Neg};
 
-use crate::{error::CalculatorResult, eval_context::EvalContext, unit::Expression};
+use crate::{error::CalculatorResult, eval_context::EvalContext, expression::Expression};
 
 pub struct UnaryExpression<O, U> {
   op: O,

@@ -1,4 +1,4 @@
-use crate::{error::CalculatorResult, eval_context::EvalContext, unit::Expression};
+use crate::{error::CalculatorResult, eval_context::EvalContext, expression::Expression};
 
 pub struct BinaryExpression<O, L, R> {
   op: O,
