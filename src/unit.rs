@@ -8,6 +8,7 @@ use crate::{
   unary::{Negate, UnaryExpression},
 };
 
+#[derive(Clone, Copy)]
 pub struct Unit<T>(pub T);
 
 impl<T> Expression for Unit<T>

@@ -35,7 +35,7 @@ impl<'a> EvalContext<'a> {
     }
   }
 
-  pub fn bind<T>(&mut self, symbol: &Symbol<T>, binding: T) -> CalculatorResult
+  pub fn bind<T>(&mut self, symbol: &'a Symbol<T>, binding: T) -> CalculatorResult
   where
     T: 'static,
   {

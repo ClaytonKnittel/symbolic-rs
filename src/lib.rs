@@ -5,3 +5,5 @@ pub mod expression;
 pub mod symbol;
 pub mod unary;
 pub mod unit;
+
+pub extern crate paste;

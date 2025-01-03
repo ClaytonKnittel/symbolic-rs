@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, ops::Neg};
+use std::{cell::Cell, marker::PhantomData, ops::Neg, thread::LocalKey};
 
 use derivative::Derivative;
 
@@ -7,35 +7,48 @@ use crate::{error::CalculatorResult, eval_context::EvalContext, expression::Expr
 #[macro_export]
 macro_rules! define_sym {
   ($x:ident, $t:ty) => {
-    #[allow(non_upper_case_globals)]
-    const $x: $crate::unit::Unit<$crate::symbol::Symbol<$t>> =
-      $crate::unit::Unit($crate::symbol::Symbol::new(stringify!($x)));
+    $crate::paste::paste! {
+      thread_local! {
+        #[allow(non_upper_case_globals)]
+        static [<$x _INTERIOR>]: std::cell::Cell<Option<$t>> = std::cell::Cell::new(None);
+      }
+
+      #[allow(non_upper_case_globals)]
+      static $x: $crate::unit::Unit<$crate::symbol::Symbol<$t>> =
+      const { $crate::unit::Unit($crate::symbol::Symbol::new(&[<$x _INTERIOR>], stringify!($x))) };
+    }
   };
 }
 
 #[derive(Derivative)]
 #[derivative(Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Symbol<I> {
-  name: &'static str,
+pub struct Symbol<'a, I: 'static> {
+  #[derivative(PartialEq = "ignore")]
+  #[derivative(Hash = "ignore")]
+  val: &'a LocalKey<Cell<Option<I>>>,
+
+  name: &'a str,
+
   #[derivative(PartialEq = "ignore")]
   #[derivative(Hash = "ignore")]
   _phantom: PhantomData<I>,
 }
 
-impl<I> Symbol<I> {
-  pub const fn new(name: &'static str) -> Self {
+impl<'a, I> Symbol<'a, I> {
+  pub const fn new(val: &'a LocalKey<Cell<Option<I>>>, name: &'a str) -> Self {
     Self {
+      val,
       name,
       _phantom: PhantomData,
     }
   }
 
-  pub const fn name(&self) -> &'static str {
+  pub const fn name(&self) -> &str {
     &self.name
   }
 }
 
-impl<I> Expression for Symbol<I>
+impl<'a, I> Expression for Symbol<'a, I>
 where
   I: Clone + Neg + 'static,
 {
