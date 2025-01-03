@@ -1,6 +1,7 @@
-use std::ops::Neg;
+use std::ops;
 
 use crate::{
+  binary::{Add, BinaryExpression},
   error::CalculatorResult,
   eval_context::EvalContext,
   expression::Expression,
@@ -20,7 +21,7 @@ where
   }
 }
 
-impl<T> Neg for Unit<T>
+impl<T> ops::Neg for Unit<T>
 where
   T: Expression,
 {
@@ -28,5 +29,17 @@ where
 
   fn neg(self) -> Self::Output {
     Unit(UnaryExpression::new(Negate::new(), self))
+  }
+}
+
+impl<T, U> ops::Add<U> for Unit<T>
+where
+  T: Expression,
+  U: Expression,
+{
+  type Output = Unit<BinaryExpression<Add<T, U>, Self, U>>;
+
+  fn add(self, rhs: U) -> Self::Output {
+    Unit(BinaryExpression::new(Add::new(), self, rhs))
   }
 }

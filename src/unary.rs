@@ -46,11 +46,11 @@ impl<T> Negate<T> {
 impl<T> UnaryOp<T::Output> for Negate<T>
 where
   T: Expression,
-  <T as Expression>::Output: Neg,
+  T::Output: Neg,
 {
   type Output = <T::Output as Neg>::Output;
 
-  fn eval(&self, x: <T as Expression>::Output) -> Self::Output {
+  fn eval(&self, x: T::Output) -> Self::Output {
     -x
   }
 }
@@ -72,7 +72,7 @@ mod tests {
   }
 
   #[gtest]
-  fn test_add() {
+  fn test_neg() {
     expect_that!(eval!(-x, (x, 33)), ok(eq(&-33)));
   }
 }
