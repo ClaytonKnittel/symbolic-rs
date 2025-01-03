@@ -1,7 +1,9 @@
-use calculator::{define_sym, eval};
+use calculator::{define_sym, error::CalculatorResult, eval};
 
-fn main() {
+fn main() -> CalculatorResult {
   define_sym!(x, i32);
-  let res = eval!(x, (x, 17), (x, 100));
-  println!("Res: {res:?}");
+  let res = eval!(-x, (x, 17))?;
+  println!("Res: {res}");
+
+  Ok(())
 }

@@ -1,23 +1,16 @@
-use std::ops::Neg;
+use crate::{error::CalculatorResult, eval_context::EvalContext, unit::Expression};
 
-use crate::{
-  error::CalculatorResult,
-  eval_context::EvalContext,
-  unary::{Negate, UnaryUnit},
-  unit::Unit,
-};
-
-pub struct BinaryUnit<O, L, R> {
+pub struct BinaryExpression<O, L, R> {
   op: O,
   lhs: L,
   rhs: R,
 }
 
-impl<O, T, U, L, R> Unit for BinaryUnit<O, L, R>
+impl<O, T, U, L, R> Expression for BinaryExpression<O, L, R>
 where
   O: BinaryOp<T, U>,
-  L: Unit<Output = T>,
-  R: Unit<Output = U>,
+  L: Expression<Output = T>,
+  R: Expression<Output = U>,
 {
   type Output = O::Output;
 
@@ -27,14 +20,6 @@ where
         .op
         .eval(self.lhs.eval(context)?, self.rhs.eval(context)?),
     )
-  }
-}
-
-impl<O, L, R> Neg for BinaryUnit<O, L, R> {
-  type Output = UnaryUnit<Negate<O>, Self>;
-
-  fn neg(self) -> Self::Output {
-    UnaryUnit::new(Negate::new(), self)
   }
 }
 

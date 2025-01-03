@@ -9,7 +9,7 @@ use crate::{
 macro_rules! expand_eval_bindings {
   ($ctx:expr) => {};
   ($ctx:expr, ($sym:expr, $binding:expr) $(, ($syms:expr, $bindings:expr) )*) => {
-    $ctx.bind(&$sym, $binding)?;
+    $ctx.bind(&$sym.0, $binding)?;
     $crate::expand_eval_bindings!($ctx $(, ($syms, $bindings) )*)
   };
 }
@@ -19,7 +19,7 @@ macro_rules! eval {
   ($eqn:expr, $( ($syms:expr, $bindings:expr) ),*) => {|| -> $crate::error::CalculatorResult<_> {
     let mut ctx = $crate::eval_context::EvalContext::new();
     $crate::expand_eval_bindings!(ctx, $( ($syms, $bindings) ),*);
-    use $crate::unit::Unit;
+    use $crate::unit::Expression;
     $eqn.eval(&ctx)
   }()};
 }
@@ -56,7 +56,6 @@ impl<'a> EvalContext<'a> {
   where
     T: Clone + 'static,
   {
-    println!("{:?}", self.map);
     self
       .map
       .get(symbol.name())
