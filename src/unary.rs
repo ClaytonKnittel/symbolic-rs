@@ -69,20 +69,17 @@ mod tests {
     prelude::{eq, ok},
   };
 
-  use crate::{define_sym, eval, unit::Unit};
+  use crate::{define_sym, eval};
 
   define_sym!(x, i32);
 
   #[gtest]
   fn test_trivial() {
-    let eqn = x;
-    let result = eval!(eqn, (x, 17));
-    expect_that!(result, ok(eq(&17)));
+    expect_that!(eval!(x, (x, 17)), ok(eq(&17)));
   }
 
-  //   #[gtest]
-  //   fn test_add() {
-  //     let eqn = -x;
-  //     expect_that!(eqn.eval(&[(x, 33)].into_iter().collect()), ok(eq(&-33)));
-  //   }
+  #[gtest]
+  fn test_add() {
+    expect_that!(eval!(-x, (x, 33)), ok(eq(&-33)));
+  }
 }
