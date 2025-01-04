@@ -78,11 +78,11 @@ mod tests {
 
   #[gtest]
   fn test_add() {
-    expect_that!(eval!(x + y, (x, 10), (y, 23)), ok(eq(&33)));
+    expect_that!(eval!(x + y, (x, 10), (y, 23)), ok(eq(33)));
   }
 
   #[gtest]
   fn test_add_to_self() {
-    expect_that!(eval!(x + x, (x, 13)), ok(eq(&26)));
+    expect_that!(eval!(x + x, (x, 13)), ok(eq(26)));
   }
 }

@@ -70,11 +70,11 @@ mod tests {
 
   #[gtest]
   fn test_trivial() {
-    expect_that!(eval!(x, (x, 17)), ok(eq(&17)));
+    expect_that!(eval!(x, (x, 17)), ok(eq(17)));
   }
 
   #[gtest]
   fn test_neg() {
-    expect_that!(eval!(-x, (x, 33)), ok(eq(&-33)));
+    expect_that!(eval!(-x, (x, 33)), ok(eq(-33)));
   }
 }

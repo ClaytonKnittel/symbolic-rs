@@ -49,11 +49,13 @@ macro_rules! clear_eval_bindings {
 #[macro_export]
 macro_rules! eval {
   ($eqn:expr $(, ($syms:expr, $bindings:expr) )*) => {{
+    #[allow(unused_imports)]
     use $crate::{
       eval_context::{EvalContextImpl, MutEvalContext},
       expression::Expression,
     };
 
+    #[allow(unused_mut)]
     let mut ctx = EvalContextImpl::new([0u8; $crate::total_size!(0 $(, $syms )*)]);
     let result = || -> $crate::error::CalculatorResult<_> {
       $crate::expand_eval_bindings!(ctx, 0 $(, ($syms, $bindings) )*);
@@ -72,7 +74,7 @@ fn symbol_offset<T>(symbol: &Symbol<T>) -> CalculatorResult<usize> {
   Ok(
     symbol
       .table_offset()
-      .ok_or_else(|| CalculatorError::SymbolNotFound(symbol.name().to_owned()))?,
+      .ok_or_else(|| CalculatorError::SymbolNotFound(symbol.name()))?,
   )
 }
 
@@ -128,5 +130,43 @@ impl<const N: usize> MutEvalContext for EvalContextImpl<N> {
 
   fn data_mut(&mut self) -> *mut u8 {
     self.data.as_mut_ptr()
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use googletest::{
+    expect_that, gtest,
+    prelude::{eq, err, matches_pattern, ok},
+  };
+
+  use crate::{define_sym, error::CalculatorError, eval};
+
+  define_sym!(x, i32);
+  define_sym!(y, i32);
+
+  #[gtest]
+  fn test_missing_binding() {
+    expect_that!(
+      eval!(x + y, (x, 10)),
+      err(matches_pattern!(CalculatorError::SymbolNotFound("y")))
+    );
+  }
+
+  #[gtest]
+  fn test_duplicate_binding() {
+    expect_that!(
+      eval!(x, (x, 1), (x, 2)),
+      err(matches_pattern!(CalculatorError::DuplicateBinding("x")))
+    );
+  }
+
+  #[gtest]
+  fn test_clear_after_use() {
+    expect_that!(eval!(x, (x, 1)), ok(eq(1)));
+    expect_that!(
+      eval!(x),
+      err(matches_pattern!(CalculatorError::SymbolNotFound("x")))
+    );
   }
 }

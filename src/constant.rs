@@ -1,4 +1,4 @@
-use crate::expression::Expression;
+use crate::{error::CalculatorResult, eval_context::EvalContext, expression::Expression};
 
 #[derive(Clone, Copy)]
 pub struct Constant<I> {
@@ -17,11 +17,8 @@ where
 {
   type Output = I;
 
-  fn eval(
-    &self,
-    _context: &impl crate::eval_context::EvalContext,
-  ) -> crate::error::CalculatorResult<Self::Output> {
-    Ok(self.val.clone())
+  fn eval(&self, _context: &impl EvalContext) -> CalculatorResult<Self::Output> {
+    Ok(self.val)
   }
 }
 
@@ -38,16 +35,16 @@ mod tests {
 
   #[gtest]
   fn test_add_rhs() {
-    expect_that!(eval!(x + 1i32, (x, 2)), ok(eq(&3)));
+    expect_that!(eval!(x + 1i32, (x, 2)), ok(eq(3)));
   }
 
   #[gtest]
   fn test_add_lhs() {
-    expect_that!(eval!(1i32 + x, (x, 3)), ok(eq(&4)));
+    expect_that!(eval!(1i32 + x, (x, 3)), ok(eq(4)));
   }
 
   #[gtest]
   fn test_add_many() {
-    expect_that!(eval!(1i32 + x + x + 3i32 + x + 4i32, (x, 1)), ok(eq(&11)));
+    expect_that!(eval!(1i32 + x + x + 3i32 + x + 4i32, (x, 1)), ok(eq(11)));
   }
 }

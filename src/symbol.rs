@@ -27,20 +27,20 @@ macro_rules! define_sym {
 
 #[derive(Derivative)]
 #[derivative(Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Symbol<'a, I: 'static> {
+pub struct Symbol<I: 'static> {
   #[derivative(PartialEq = "ignore")]
   #[derivative(Hash = "ignore")]
   val: &'static LocalKey<Cell<Option<usize>>>,
 
-  name: &'a str,
+  name: &'static str,
 
   #[derivative(PartialEq = "ignore")]
   #[derivative(Hash = "ignore")]
   _phantom: PhantomData<I>,
 }
 
-impl<'a, I> Symbol<'a, I> {
-  pub const fn new(val: &'static LocalKey<Cell<Option<usize>>>, name: &'a str) -> Self {
+impl<I> Symbol<I> {
+  pub const fn new(val: &'static LocalKey<Cell<Option<usize>>>, name: &'static str) -> Self {
     Self {
       val,
       name,
@@ -54,7 +54,7 @@ impl<'a, I> Symbol<'a, I> {
 
   pub fn set_table_offset(&self, offset: usize) -> CalculatorResult {
     if let Some(_) = self.val.replace(Some(offset)) {
-      Err(CalculatorError::DuplicateBinding(self.name().to_owned()).into())
+      Err(CalculatorError::DuplicateBinding(self.name()).into())
     } else {
       Ok(())
     }
@@ -64,12 +64,12 @@ impl<'a, I> Symbol<'a, I> {
     self.val.replace(None);
   }
 
-  pub const fn name(&self) -> &str {
+  pub const fn name(&self) -> &'static str {
     &self.name
   }
 }
 
-impl<'a, I> Expression for Symbol<'a, I>
+impl<I> Expression for Symbol<I>
 where
   I: Clone + 'static,
 {

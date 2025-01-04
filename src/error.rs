@@ -1,11 +1,11 @@
 use std::{error::Error, fmt::Display};
 
-pub type CalculatorResult<T = ()> = Result<T, Box<dyn Error>>;
+pub type CalculatorResult<T = ()> = Result<T, CalculatorError>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum CalculatorError {
-  SymbolNotFound(String),
-  DuplicateBinding(String),
+  SymbolNotFound(&'static str),
+  DuplicateBinding(&'static str),
 }
 
 impl Display for CalculatorError {
