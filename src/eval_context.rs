@@ -144,6 +144,11 @@ mod tests {
   define_sym!(y, i32);
 
   #[gtest]
+  fn test_trivial() {
+    expect_that!(eval!(x, (x, 17)), ok(eq(17)));
+  }
+
+  #[gtest]
   fn test_missing_binding() {
     expect_that!(
       eval!(x + y, (x, 10)),
