@@ -13,7 +13,7 @@ macro_rules! construct_data {
     [0u8; $size]
   };
   ($size:expr, $sym:expr $(, $syms:expr )*) => {
-    $crate::construct_data!($size + $crate::eval_context::sym_size_of_output(&$sym) $(, $syms )*)
+    $crate::construct_data!($size + $crate::eval_context::sym_size_of_output(&$sym.0) $(, $syms )*)
   };
 }
 
@@ -21,7 +21,7 @@ macro_rules! construct_data {
 macro_rules! expand_eval_bindings {
   ($ctx:expr) => {};
   ($ctx:expr, ($sym:expr, $binding:expr) $(, ($syms:expr, $bindings:expr) )*) => {
-    // $ctx.bind(&$sym, $binding)?;
+    $ctx.bind(&$sym.0, $binding)?;
     $crate::expand_eval_bindings!($ctx $(, ($syms, $bindings) )*)
   };
 }
@@ -30,40 +30,47 @@ macro_rules! expand_eval_bindings {
 macro_rules! eval {
   ($eqn:expr $(, ($syms:expr, $bindings:expr) )*) => {|| -> $crate::error::CalculatorResult<_> {
     let data = $crate::construct_data!(0 $(, $syms )*);
-    let mut ctx = $crate::eval_context::EvalContext::new(data);
+    let mut ctx = $crate::eval_context::EvalContextImpl::new(data);
     $crate::expand_eval_bindings!(ctx $(, ($syms, $bindings) )*);
     use $crate::expression::Expression;
     $eqn.eval(&ctx)
   }()};
 }
 
-pub struct EvalContext<const N: usize> {
+pub trait EvalContext {
+  fn sym_val<T: Clone + 'static>(&self, symbol: &Symbol<T>) -> CalculatorResult<T>;
+}
+
+pub struct EvalContextImpl<const N: usize> {
   data: [u8; N],
 }
 
-impl<const N: usize> EvalContext<N> {
+impl<const N: usize> EvalContextImpl<N> {
   pub fn new(data: [u8; N]) -> Self {
     Self { data }
   }
 
-  // pub fn bind<T>(&mut self, symbol: &Symbol<T>, binding: T) -> CalculatorResult
-  // where
-  //   T: 'static,
-  // {
-  //   if let Some(binding) = self.map.insert(symbol.name(), Box::new(binding)) {
-  //     Err(
-  //       CalculatorError::DuplicateBinding(format!(
-  //         "{} already bound to value {binding:?}",
-  //         symbol.name()
-  //       ))
-  //       .into(),
-  //     )
-  //   } else {
-  //     Ok(())
-  //   }
-  // }
+  pub fn bind<T>(&mut self, symbol: &Symbol<T>, binding: T) -> CalculatorResult
+  where
+    T: 'static,
+  {
+    todo!()
+    // if let Some(binding) = self.map.insert(symbol.name(), Box::new(binding)) {
+    //   Err(
+    //     CalculatorError::DuplicateBinding(format!(
+    //       "{} already bound to value {binding:?}",
+    //       symbol.name()
+    //     ))
+    //     .into(),
+    //   )
+    // } else {
+    //   Ok(())
+    // }
+  }
+}
 
-  pub fn sym_val<T>(&self, symbol: &Symbol<T>) -> CalculatorResult<T>
+impl<const N: usize> EvalContext for EvalContextImpl<N> {
+  fn sym_val<T>(&self, symbol: &Symbol<T>) -> CalculatorResult<T>
   where
     T: Clone + 'static,
   {

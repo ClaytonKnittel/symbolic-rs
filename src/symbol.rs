@@ -14,8 +14,8 @@ macro_rules! define_sym {
       }
 
       #[allow(non_upper_case_globals)]
-      static $x: $crate::symbol::Symbol<$t> = const {
-        $crate::symbol::Symbol::new(&[<$x _INTERIOR>], stringify!($x))
+      static $x: $crate::unit::Unit<$crate::symbol::Symbol<$t>> = const {
+        $crate::unit::Unit($crate::symbol::Symbol::new(&[<$x _INTERIOR>], stringify!($x)))
       };
     }
   };
@@ -53,13 +53,13 @@ impl<'a, I> Symbol<'a, I> {
   }
 }
 
-impl<'a, I, const N: usize> Expression<N> for Symbol<'a, I>
+impl<'a, I> Expression for Symbol<'a, I>
 where
   I: Clone + Neg + 'static,
 {
   type Output = I;
 
-  fn eval(&self, context: &EvalContext<N>) -> CalculatorResult<I> {
+  fn eval(&self, context: &impl EvalContext) -> CalculatorResult<I> {
     context.sym_val(self)
   }
 }

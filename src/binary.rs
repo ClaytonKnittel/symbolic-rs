@@ -22,7 +22,7 @@ where
 {
   type Output = O::Output;
 
-  fn eval(&self, context: &EvalContext) -> CalculatorResult<O::Output> {
+  fn eval(&self, context: &impl EvalContext) -> CalculatorResult<O::Output> {
     Ok(
       self
         .op
