@@ -18,7 +18,7 @@ macro_rules! define_sym {
       }
 
       #[allow(non_upper_case_globals)]
-      static $x: $crate::unit::Unit<$crate::symbol::Symbol<$t>> = const {
+      const $x: $crate::unit::Unit<$crate::symbol::Symbol<$t>> = const {
         $crate::unit::Unit($crate::symbol::Symbol::new(&[<$x _INTERIOR>], stringify!($x)))
       };
     }
