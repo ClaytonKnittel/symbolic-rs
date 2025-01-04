@@ -2,6 +2,7 @@ use std::{marker::PhantomData, ops};
 
 use crate::{error::CalculatorResult, eval_context::EvalContext, expression::Expression};
 
+#[derive(Clone, Copy)]
 pub struct BinaryExpression<O, L, R> {
   op: O,
   lhs: L,
@@ -31,12 +32,13 @@ where
   }
 }
 
-pub trait BinaryOp<T, U> {
+pub trait BinaryOp<T, U>: Copy {
   type Output;
 
   fn eval(&self, x: T, y: U) -> Self::Output;
 }
 
+#[derive(Clone, Copy)]
 pub struct Add<T, U> {
   _phantom: PhantomData<(T, U)>,
 }

@@ -2,6 +2,7 @@ use std::{marker::PhantomData, ops::Neg};
 
 use crate::{error::CalculatorResult, eval_context::EvalContext, expression::Expression};
 
+#[derive(Clone, Copy)]
 pub struct UnaryExpression<O, U> {
   op: O,
   unit: U,
@@ -25,12 +26,13 @@ where
   }
 }
 
-pub trait UnaryOp<T> {
+pub trait UnaryOp<T>: Copy {
   type Output;
 
   fn eval(&self, x: T) -> Self::Output;
 }
 
+#[derive(Clone, Copy)]
 pub struct Negate<T> {
   _phantom: PhantomData<T>,
 }
