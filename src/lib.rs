@@ -1,6 +1,7 @@
 pub mod binary;
 pub mod cast;
 pub mod constant;
+pub mod derivative;
 pub mod error;
 pub mod eval_context;
 pub mod expression;

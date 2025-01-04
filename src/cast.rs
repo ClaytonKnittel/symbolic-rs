@@ -38,15 +38,3 @@ where
     x.as_()
   }
 }
-
-// impl<T, U> UnaryOp<T::Output> for Cast<T, U>
-// where
-//   T: Expression,
-//   U: From<T::Output>,
-// {
-//   type Output = U;
-
-//   fn eval(&self, x: T::Output) -> Self::Output {
-//     x.into()
-//   }
-// }

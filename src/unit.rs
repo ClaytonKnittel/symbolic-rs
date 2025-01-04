@@ -7,6 +7,7 @@ use crate::{
   eval_context::EvalContext,
   expression::{Expression, IntoExpression},
   std_unary_ops::{Negate, Sqrt},
+  symbol::Symbol,
   unary::UnaryExpression,
 };
 
@@ -23,6 +24,10 @@ where
 
   pub fn sqrt(self) -> Unit<UnaryExpression<Sqrt<T>, T>> {
     Unit(UnaryExpression::new(Sqrt::new(), self.0))
+  }
+
+  pub fn d<I>(self, wrt: Symbol<I>) -> impl Expression {
+    self
   }
 }
 
