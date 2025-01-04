@@ -54,7 +54,7 @@ impl<I> Symbol<I> {
 
   pub fn set_table_offset(&self, offset: usize) -> CalculatorResult {
     if let Some(_) = self.val.replace(Some(offset)) {
-      Err(CalculatorError::DuplicateBinding(self.name()).into())
+      Err(CalculatorError::DuplicateBinding(self.name()))
     } else {
       Ok(())
     }

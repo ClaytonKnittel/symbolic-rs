@@ -71,11 +71,9 @@ pub trait EvalContext {
 }
 
 fn symbol_offset<T>(symbol: &Symbol<T>) -> CalculatorResult<usize> {
-  Ok(
-    symbol
-      .table_offset()
-      .ok_or_else(|| CalculatorError::SymbolNotFound(symbol.name()))?,
-  )
+  symbol
+    .table_offset()
+    .ok_or_else(|| CalculatorError::SymbolNotFound(symbol.name()))
 }
 
 pub trait MutEvalContext {
