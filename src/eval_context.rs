@@ -5,7 +5,7 @@ use crate::{
 
 pub const fn next_offsets<T>(offset: usize) -> (usize, usize) {
   let align = align_of::<T>();
-  let offset = (offset + align - 1) & !(align - 1);
+  let offset = (offset + align) & !(align - 1);
   (offset, offset + size_of::<T>())
 }
 
@@ -38,17 +38,30 @@ macro_rules! expand_eval_bindings {
 }
 
 #[macro_export]
+macro_rules! clear_eval_bindings {
+  ($ctx:expr) => {};
+  ($ctx:expr, $sym:expr $(, $syms:expr )*) => {
+    $sym.0.clear_table_offset();
+    $crate::clear_eval_bindings!($ctx $(, $syms )*);
+  };
+}
+
+#[macro_export]
 macro_rules! eval {
-  ($eqn:expr $(, ($syms:expr, $bindings:expr) )*) => {|| -> $crate::error::CalculatorResult<_> {
+  ($eqn:expr $(, ($syms:expr, $bindings:expr) )*) => {{
     use $crate::{
       eval_context::{EvalContextImpl, MutEvalContext},
       expression::Expression,
     };
 
     let mut ctx = EvalContextImpl::new([0u8; $crate::total_size!(0 $(, $syms )*)]);
-    $crate::expand_eval_bindings!(ctx, 0 $(, ($syms, $bindings) )*);
-    $eqn.eval(&ctx)
-  }()};
+    let result = || -> $crate::error::CalculatorResult<_> {
+      $crate::expand_eval_bindings!(ctx, 0 $(, ($syms, $bindings) )*);
+      $eqn.eval(&ctx)
+    }();
+    $crate::clear_eval_bindings!(ctx $(, $syms )*);
+    result
+  }};
 }
 
 pub trait EvalContext {
