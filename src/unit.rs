@@ -2,15 +2,29 @@ use std::ops;
 
 use crate::{
   binary::BinaryExpression,
+  cast::Cast,
   error::CalculatorResult,
   eval_context::EvalContext,
   expression::{Expression, IntoExpression},
-  negate::Negate,
+  std_unary_ops::{Negate, Sqrt},
   unary::UnaryExpression,
 };
 
 #[derive(Clone, Copy)]
 pub struct Unit<T>(pub T);
+
+impl<T> Unit<T>
+where
+  T: Expression,
+{
+  pub fn cast<U>(self) -> Unit<UnaryExpression<Cast<T, U>, T>> {
+    Unit(UnaryExpression::new(Cast::new(), self.0))
+  }
+
+  pub fn sqrt(self) -> Unit<UnaryExpression<Sqrt<T>, T>> {
+    Unit(UnaryExpression::new(Sqrt::new(), self.0))
+  }
+}
 
 impl<T> Expression for Unit<T>
 where
@@ -50,7 +64,7 @@ macro_rules! define_op_impl {
     impl<T, U> ops::$op_name<U> for Unit<T>
     where
       T: Expression,
-      U: IntoExpression<Expr: Expression>,
+      U: IntoExpression,
       T::Output: ops::$op_name<<<U as IntoExpression>::Expr as Expression>::Output>,
     {
       type Output =
