@@ -1,4 +1,5 @@
 pub mod binary;
+pub mod constant;
 pub mod error;
 pub mod eval_context;
 pub mod expression;

@@ -1,4 +1,4 @@
-use std::{cell::Cell, marker::PhantomData, ops::Neg, thread::LocalKey};
+use std::{cell::Cell, marker::PhantomData, thread::LocalKey};
 
 use derivative::Derivative;
 
@@ -71,7 +71,7 @@ impl<'a, I> Symbol<'a, I> {
 
 impl<'a, I> Expression for Symbol<'a, I>
 where
-  I: Clone + Neg + 'static,
+  I: Clone + 'static,
 {
   type Output = I;
 

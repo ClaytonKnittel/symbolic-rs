@@ -4,8 +4,7 @@ use crate::{
   binary::{Add, BinaryExpression},
   error::CalculatorResult,
   eval_context::EvalContext,
-  expression::Expression,
-  symbol::Symbol,
+  expression::{Expression, IntoExpression},
   unary::{Negate, UnaryExpression},
 };
 
@@ -23,9 +22,14 @@ where
   }
 }
 
-impl<'a, I> From<Symbol<'a, I>> for Unit<Symbol<'a, I>> {
-  fn from(value: Symbol<'a, I>) -> Self {
-    Unit(value)
+impl<T> IntoExpression for Unit<T>
+where
+  T: Expression,
+{
+  type Expr = T;
+
+  fn into_expression(self) -> Self::Expr {
+    self.0
   }
 }
 
@@ -33,21 +37,26 @@ impl<T> ops::Neg for Unit<T>
 where
   T: Expression,
 {
-  type Output = Unit<UnaryExpression<Negate<T>, Self>>;
+  type Output = Unit<UnaryExpression<Negate<T>, T>>;
 
   fn neg(self) -> Self::Output {
-    Unit(UnaryExpression::new(Negate::new(), self))
+    Unit(UnaryExpression::new(Negate::new(), self.0))
   }
 }
 
 impl<T, U> ops::Add<U> for Unit<T>
 where
   T: Expression,
-  U: Expression,
+  U: IntoExpression<Expr: Expression>,
+  T::Output: ops::Add<<<U as IntoExpression>::Expr as Expression>::Output>,
 {
-  type Output = Unit<BinaryExpression<Add<T, U>, Self, U>>;
+  type Output = Unit<BinaryExpression<Add<T, U::Expr>, T, U::Expr>>;
 
   fn add(self, rhs: U) -> Self::Output {
-    Unit(BinaryExpression::new(Add::new(), self, rhs))
+    Unit(BinaryExpression::new(
+      Add::new(),
+      self.0,
+      rhs.into_expression(),
+    ))
   }
 }
