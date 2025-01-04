@@ -1,13 +1,10 @@
-use calculator::{construct_data, define_sym, error::CalculatorResult, eval};
+use calculator::{define_sym, error::CalculatorResult, eval};
 
 fn main() -> CalculatorResult {
-  let list = [0u8; (std::mem::size_of::<u8>() + std::mem::size_of::<u32>())];
-
   define_sym!(x, i32);
+  define_sym!(y, i32);
 
-  construct_data!(0, x);
-
-  let res = eval!(-x, (x, 17))?;
+  let res = eval!(-x + y, (x, 17), (y, 20))?;
   println!("Res: {res}");
 
   Ok(())

@@ -2,7 +2,11 @@ use std::{cell::Cell, marker::PhantomData, ops::Neg, thread::LocalKey};
 
 use derivative::Derivative;
 
-use crate::{error::CalculatorResult, eval_context::EvalContext, expression::Expression};
+use crate::{
+  error::{CalculatorError, CalculatorResult},
+  eval_context::EvalContext,
+  expression::Expression,
+};
 
 #[macro_export]
 macro_rules! define_sym {
@@ -46,6 +50,19 @@ impl<'a, I> Symbol<'a, I> {
 
   pub fn table_offset(&self) -> Option<usize> {
     self.val.get()
+  }
+
+  pub fn set_table_offset(&self, offset: usize) -> CalculatorResult {
+    println!("Setting val to {offset} for {}", self.name);
+    if let Some(_) = self.val.replace(Some(offset)) {
+      Err(CalculatorError::DuplicateBinding(self.name().to_owned()).into())
+    } else {
+      Ok(())
+    }
+  }
+
+  pub fn clear_table_offset(&self) {
+    self.val.replace(None);
   }
 
   pub const fn name(&self) -> &str {
