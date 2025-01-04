@@ -7,8 +7,8 @@ fn main() -> CalculatorResult {
   let res = eval!(-x + y, (x, 17), (y, 20))?;
   println!("Res: {res}");
 
-  let res2 = eval!(x + y, (x, 10), (y, 13))?;
-  println!("Res: {res2}");
+  let res = eval!(x + -y, (x, 10), (y, 15))?;
+  println!("Res: {res}");
 
   Ok(())
 }
