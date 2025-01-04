@@ -1,4 +1,12 @@
-use crate::{constant::Constant, error::CalculatorResult, eval_context::EvalContext};
+use std::ops;
+
+use crate::{
+  binary::{Add, BinaryExpression},
+  constant::Constant,
+  error::CalculatorResult,
+  eval_context::EvalContext,
+  unit::Unit,
+};
 
 pub trait Expression: Copy {
   type Output;
@@ -19,6 +27,22 @@ macro_rules! constant_into_expr {
 
       fn into_expression(self) -> Self::Expr {
         Constant::new(self)
+      }
+    }
+
+    impl<T> ops::Add<Unit<T>> for $t
+    where
+      T: Expression,
+      $t: ops::Add<<T as Expression>::Output>,
+    {
+      type Output = Unit<BinaryExpression<Add<Constant<$t>, T>, Constant<$t>, T>>;
+
+      fn add(self, rhs: Unit<T>) -> Self::Output {
+        Unit(BinaryExpression::new(
+          Add::new(),
+          Constant::new(self),
+          rhs.0,
+        ))
       }
     }
   };

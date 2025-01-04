@@ -4,7 +4,7 @@ fn main() -> CalculatorResult {
   define_sym!(x, i32);
   define_sym!(y, i32);
 
-  let equation: _ = -x + y + 4i32;
+  let equation: _ = 4i32 + -x + y;
 
   let res = eval!(equation, (x, 1), (y, 2))?;
   println!("Res: {res}");
