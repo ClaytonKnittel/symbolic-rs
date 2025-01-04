@@ -167,4 +167,16 @@ mod tests {
       err(matches_pattern!(CalculatorError::SymbolNotFound("x")))
     );
   }
+
+  #[gtest]
+  fn test_clear_after_error() {
+    expect_that!(
+      eval!(x, (x, 1), (x, 2)),
+      err(matches_pattern!(CalculatorError::DuplicateBinding("x")))
+    );
+    expect_that!(
+      eval!(x),
+      err(matches_pattern!(CalculatorError::SymbolNotFound("x")))
+    );
+  }
 }
